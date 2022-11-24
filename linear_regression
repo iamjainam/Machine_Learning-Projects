@@ -1,0 +1,1468 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/jainam-shah1/Machine-Learning/blob/main/linear_regression\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "1ef9e142",
+      "metadata": {
+        "id": "1ef9e142"
+      },
+      "source": [
+        "\n",
+        "##Linear Regression \n",
+        ">by *Jainam Shah*"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "9e6d1bed",
+      "metadata": {
+        "id": "9e6d1bed"
+      },
+      "source": [
+        "> Import necessary libraries for analysis, visualization and creating linear models"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "51eab5a4",
+      "metadata": {
+        "id": "51eab5a4"
+      },
+      "outputs": [],
+      "source": [
+        "import numpy as np\n",
+        "import pandas as pd\n",
+        "import matplotlib.pyplot as plt\n",
+        "from sklearn import linear_model\n",
+        "import statsmodels.api as sm\n",
+        "import statsmodels.formula.api as smf\n",
+        "import seaborn as sns\n",
+        "import warnings\n",
+        "warnings.filterwarnings(\"ignore\")"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "c11905a0",
+      "metadata": {
+        "id": "c11905a0"
+      },
+      "source": [
+        ">Import training data csv and store it under `df_train` and I will use all 700 attributes for prediction."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "9902f8bd",
+      "metadata": {
+        "scrolled": true,
+        "id": "9902f8bd",
+        "outputId": "37775094-800f-4e61-d083-2668d5bc3369"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "(700, 9)\n"
+          ]
+        },
+        {
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Cement</th>\n",
+              "      <th>Blast Furnace Slag</th>\n",
+              "      <th>Fly Ash</th>\n",
+              "      <th>Water</th>\n",
+              "      <th>Superplasticizer</th>\n",
+              "      <th>Coarse Aggregate</th>\n",
+              "      <th>Fine Aggregate</th>\n",
+              "      <th>Age</th>\n",
+              "      <th>Compressive Strength</th>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>Batch</th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>148.0</td>\n",
+              "      <td>175.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>171.0</td>\n",
+              "      <td>2.0</td>\n",
+              "      <td>1000.0</td>\n",
+              "      <td>828.0</td>\n",
+              "      <td>28</td>\n",
+              "      <td>26.92</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>446.0</td>\n",
+              "      <td>24.0</td>\n",
+              "      <td>79.0</td>\n",
+              "      <td>162.0</td>\n",
+              "      <td>11.6</td>\n",
+              "      <td>967.0</td>\n",
+              "      <td>712.0</td>\n",
+              "      <td>7</td>\n",
+              "      <td>52.01</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>250.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>95.7</td>\n",
+              "      <td>191.8</td>\n",
+              "      <td>5.3</td>\n",
+              "      <td>948.9</td>\n",
+              "      <td>857.2</td>\n",
+              "      <td>3</td>\n",
+              "      <td>8.49</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>165.0</td>\n",
+              "      <td>128.5</td>\n",
+              "      <td>132.1</td>\n",
+              "      <td>175.1</td>\n",
+              "      <td>8.1</td>\n",
+              "      <td>1005.8</td>\n",
+              "      <td>746.6</td>\n",
+              "      <td>14</td>\n",
+              "      <td>33.09</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>222.4</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>96.7</td>\n",
+              "      <td>189.3</td>\n",
+              "      <td>4.5</td>\n",
+              "      <td>967.1</td>\n",
+              "      <td>870.3</td>\n",
+              "      <td>3</td>\n",
+              "      <td>11.58</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "       Cement  Blast Furnace Slag  Fly Ash  Water  Superplasticizer  \\\n",
+              "Batch                                                                 \n",
+              "0       148.0               175.0      0.0  171.0               2.0   \n",
+              "1       446.0                24.0     79.0  162.0              11.6   \n",
+              "2       250.0                 0.0     95.7  191.8               5.3   \n",
+              "3       165.0               128.5    132.1  175.1               8.1   \n",
+              "4       222.4                 0.0     96.7  189.3               4.5   \n",
+              "\n",
+              "       Coarse Aggregate  Fine Aggregate  Age  Compressive Strength  \n",
+              "Batch                                                               \n",
+              "0                1000.0           828.0   28                 26.92  \n",
+              "1                 967.0           712.0    7                 52.01  \n",
+              "2                 948.9           857.2    3                  8.49  \n",
+              "3                1005.8           746.6   14                 33.09  \n",
+              "4                 967.1           870.3    3                 11.58  "
+            ]
+          },
+          "execution_count": 2,
+          "metadata": {},
+          "output_type": "execute_result"
+        }
+      ],
+      "source": [
+        "df_train = pd.read_csv('../Homework_2/concrete_strength_train.csv', index_col=False)\n",
+        "df_train.set_index('Batch', inplace=True)\n",
+        "print(df_train.shape)\n",
+        "df_train.head()\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "294e52b9",
+      "metadata": {
+        "id": "294e52b9"
+      },
+      "source": [
+        ">Import test data csv and store it under `df_test` and it has 300 rows."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "644f7350",
+      "metadata": {
+        "id": "644f7350",
+        "outputId": "3cb64d10-b51c-4ea6-9e6f-b69c982dee6b"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "(300, 8)\n"
+          ]
+        },
+        {
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Cement</th>\n",
+              "      <th>Blast Furnace Slag</th>\n",
+              "      <th>Fly Ash</th>\n",
+              "      <th>Water</th>\n",
+              "      <th>Superplasticizer</th>\n",
+              "      <th>Coarse Aggregate</th>\n",
+              "      <th>Fine Aggregate</th>\n",
+              "      <th>Age</th>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>Batch</th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>136.0</td>\n",
+              "      <td>196.0</td>\n",
+              "      <td>98.0</td>\n",
+              "      <td>199.0</td>\n",
+              "      <td>6.0</td>\n",
+              "      <td>847.0</td>\n",
+              "      <td>783.0</td>\n",
+              "      <td>28</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>143.8</td>\n",
+              "      <td>136.3</td>\n",
+              "      <td>106.2</td>\n",
+              "      <td>178.1</td>\n",
+              "      <td>7.5</td>\n",
+              "      <td>941.5</td>\n",
+              "      <td>774.3</td>\n",
+              "      <td>28</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>439.0</td>\n",
+              "      <td>177.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>186.0</td>\n",
+              "      <td>11.1</td>\n",
+              "      <td>884.9</td>\n",
+              "      <td>707.9</td>\n",
+              "      <td>3</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>190.3</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>125.2</td>\n",
+              "      <td>161.9</td>\n",
+              "      <td>9.9</td>\n",
+              "      <td>1088.1</td>\n",
+              "      <td>802.6</td>\n",
+              "      <td>14</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>339.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>197.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>968.0</td>\n",
+              "      <td>781.0</td>\n",
+              "      <td>14</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "       Cement  Blast Furnace Slag  Fly Ash  Water  Superplasticizer  \\\n",
+              "Batch                                                                 \n",
+              "0       136.0               196.0     98.0  199.0               6.0   \n",
+              "1       143.8               136.3    106.2  178.1               7.5   \n",
+              "2       439.0               177.0      0.0  186.0              11.1   \n",
+              "3       190.3                 0.0    125.2  161.9               9.9   \n",
+              "4       339.0                 0.0      0.0  197.0               0.0   \n",
+              "\n",
+              "       Coarse Aggregate  Fine Aggregate  Age  \n",
+              "Batch                                         \n",
+              "0                 847.0           783.0   28  \n",
+              "1                 941.5           774.3   28  \n",
+              "2                 884.9           707.9    3  \n",
+              "3                1088.1           802.6   14  \n",
+              "4                 968.0           781.0   14  "
+            ]
+          },
+          "execution_count": 3,
+          "metadata": {},
+          "output_type": "execute_result"
+        }
+      ],
+      "source": [
+        "df_test = pd.read_csv('../Homework_2/concrete_strength_test-1.csv', index_col=False)\n",
+        "df_test.set_index('Batch', inplace=True)\n",
+        "print(df_test.shape)\n",
+        "df_test.head()"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "cbeece99",
+      "metadata": {
+        "id": "cbeece99"
+      },
+      "source": [
+        ">Importing dataset that contains the true value of the predicted varibale in this model analysis as `df_true`. Then I will convert the data into arrays similar to the predicted value. "
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "fc04c6ba",
+      "metadata": {
+        "id": "fc04c6ba",
+        "outputId": "28d76ce9-4878-4a3f-ebd2-9aae653d04ff"
+      },
+      "outputs": [
+        {
+          "data": {
+            "text/plain": [
+              "array([[26.97],\n",
+              "       [26.15],\n",
+              "       [39.3 ],\n",
+              "       [22.72],\n",
+              "       [27.04],\n",
+              "       [26.05],\n",
+              "       [45.84],\n",
+              "       [55.51],\n",
+              "       [28.63],\n",
+              "       [33.27],\n",
+              "       [53.77],\n",
+              "       [19.69],\n",
+              "       [40.15],\n",
+              "       [79.3 ],\n",
+              "       [31.72],\n",
+              "       [36.15],\n",
+              "       [42.33],\n",
+              "       [52.82],\n",
+              "       [66.7 ],\n",
+              "       [ 6.47]])"
+            ]
+          },
+          "execution_count": 4,
+          "metadata": {},
+          "output_type": "execute_result"
+        }
+      ],
+      "source": [
+        "df_true = pd.read_csv('../Homework_2/y_concrete_strength_test.csv', index_col=False)\n",
+        "df_true.set_index('Batch', inplace=True)\n",
+        "df_true\n",
+        "\n",
+        "arr = df_true.to_numpy()\n",
+        "arr[:20]"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "6fb3635e",
+      "metadata": {
+        "id": "6fb3635e"
+      },
+      "source": [
+        ">Changed name and spacing of columns in `df_train` dataset."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "e0d2903a",
+      "metadata": {
+        "id": "e0d2903a",
+        "outputId": "0d0336b9-f45b-4147-cc34-32989b8bd449"
+      },
+      "outputs": [
+        {
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Cement</th>\n",
+              "      <th>Blast_Furnace_Slag</th>\n",
+              "      <th>Fly_Ash</th>\n",
+              "      <th>Water</th>\n",
+              "      <th>Superplasticizer</th>\n",
+              "      <th>Coarse_Aggregate</th>\n",
+              "      <th>Fine_Aggregate</th>\n",
+              "      <th>Age</th>\n",
+              "      <th>Compressive_Strength</th>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>Batch</th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>148.0</td>\n",
+              "      <td>175.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>171.0</td>\n",
+              "      <td>2.0</td>\n",
+              "      <td>1000.0</td>\n",
+              "      <td>828.0</td>\n",
+              "      <td>28</td>\n",
+              "      <td>26.92</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>446.0</td>\n",
+              "      <td>24.0</td>\n",
+              "      <td>79.0</td>\n",
+              "      <td>162.0</td>\n",
+              "      <td>11.6</td>\n",
+              "      <td>967.0</td>\n",
+              "      <td>712.0</td>\n",
+              "      <td>7</td>\n",
+              "      <td>52.01</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>250.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>95.7</td>\n",
+              "      <td>191.8</td>\n",
+              "      <td>5.3</td>\n",
+              "      <td>948.9</td>\n",
+              "      <td>857.2</td>\n",
+              "      <td>3</td>\n",
+              "      <td>8.49</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>165.0</td>\n",
+              "      <td>128.5</td>\n",
+              "      <td>132.1</td>\n",
+              "      <td>175.1</td>\n",
+              "      <td>8.1</td>\n",
+              "      <td>1005.8</td>\n",
+              "      <td>746.6</td>\n",
+              "      <td>14</td>\n",
+              "      <td>33.09</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>222.4</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>96.7</td>\n",
+              "      <td>189.3</td>\n",
+              "      <td>4.5</td>\n",
+              "      <td>967.1</td>\n",
+              "      <td>870.3</td>\n",
+              "      <td>3</td>\n",
+              "      <td>11.58</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>...</th>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>695</th>\n",
+              "      <td>314.0</td>\n",
+              "      <td>145.3</td>\n",
+              "      <td>113.2</td>\n",
+              "      <td>178.9</td>\n",
+              "      <td>8.0</td>\n",
+              "      <td>869.1</td>\n",
+              "      <td>690.2</td>\n",
+              "      <td>28</td>\n",
+              "      <td>46.23</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>696</th>\n",
+              "      <td>393.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>192.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>940.6</td>\n",
+              "      <td>785.6</td>\n",
+              "      <td>3</td>\n",
+              "      <td>19.20</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>697</th>\n",
+              "      <td>500.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>200.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>1125.0</td>\n",
+              "      <td>613.0</td>\n",
+              "      <td>1</td>\n",
+              "      <td>12.64</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>698</th>\n",
+              "      <td>288.0</td>\n",
+              "      <td>192.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>192.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>932.0</td>\n",
+              "      <td>717.8</td>\n",
+              "      <td>28</td>\n",
+              "      <td>38.80</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>699</th>\n",
+              "      <td>401.8</td>\n",
+              "      <td>94.7</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>147.4</td>\n",
+              "      <td>11.4</td>\n",
+              "      <td>946.8</td>\n",
+              "      <td>852.1</td>\n",
+              "      <td>3</td>\n",
+              "      <td>41.10</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "<p>700 rows × 9 columns</p>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "       Cement  Blast_Furnace_Slag  Fly_Ash  Water  Superplasticizer  \\\n",
+              "Batch                                                                 \n",
+              "0       148.0               175.0      0.0  171.0               2.0   \n",
+              "1       446.0                24.0     79.0  162.0              11.6   \n",
+              "2       250.0                 0.0     95.7  191.8               5.3   \n",
+              "3       165.0               128.5    132.1  175.1               8.1   \n",
+              "4       222.4                 0.0     96.7  189.3               4.5   \n",
+              "...       ...                 ...      ...    ...               ...   \n",
+              "695     314.0               145.3    113.2  178.9               8.0   \n",
+              "696     393.0                 0.0      0.0  192.0               0.0   \n",
+              "697     500.0                 0.0      0.0  200.0               0.0   \n",
+              "698     288.0               192.0      0.0  192.0               0.0   \n",
+              "699     401.8                94.7      0.0  147.4              11.4   \n",
+              "\n",
+              "       Coarse_Aggregate  Fine_Aggregate  Age  Compressive_Strength  \n",
+              "Batch                                                               \n",
+              "0                1000.0           828.0   28                 26.92  \n",
+              "1                 967.0           712.0    7                 52.01  \n",
+              "2                 948.9           857.2    3                  8.49  \n",
+              "3                1005.8           746.6   14                 33.09  \n",
+              "4                 967.1           870.3    3                 11.58  \n",
+              "...                 ...             ...  ...                   ...  \n",
+              "695               869.1           690.2   28                 46.23  \n",
+              "696               940.6           785.6    3                 19.20  \n",
+              "697              1125.0           613.0    1                 12.64  \n",
+              "698               932.0           717.8   28                 38.80  \n",
+              "699               946.8           852.1    3                 41.10  \n",
+              "\n",
+              "[700 rows x 9 columns]"
+            ]
+          },
+          "execution_count": 5,
+          "metadata": {},
+          "output_type": "execute_result"
+        }
+      ],
+      "source": [
+        "df_train.columns = ['Cement','Blast_Furnace_Slag','Fly_Ash','Water','Superplasticizer',\n",
+        "              'Coarse_Aggregate','Fine_Aggregate','Age','Compressive_Strength']\n",
+        "df_train"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "b8719517",
+      "metadata": {
+        "id": "b8719517"
+      },
+      "source": [
+        ">Changed name and spacing of columns in `df_test` dataset."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "a27c4d00",
+      "metadata": {
+        "id": "a27c4d00",
+        "outputId": "4172d25a-c8fa-4c88-e04e-0fd5fb70f458"
+      },
+      "outputs": [
+        {
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Cement</th>\n",
+              "      <th>Blast_Furnace_Slag</th>\n",
+              "      <th>Fly_Ash</th>\n",
+              "      <th>Water</th>\n",
+              "      <th>Superplasticizer</th>\n",
+              "      <th>Coarse_Aggregate</th>\n",
+              "      <th>Fine_Aggregate</th>\n",
+              "      <th>Age</th>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>Batch</th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>136.0</td>\n",
+              "      <td>196.0</td>\n",
+              "      <td>98.0</td>\n",
+              "      <td>199.0</td>\n",
+              "      <td>6.0</td>\n",
+              "      <td>847.0</td>\n",
+              "      <td>783.0</td>\n",
+              "      <td>28</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>143.8</td>\n",
+              "      <td>136.3</td>\n",
+              "      <td>106.2</td>\n",
+              "      <td>178.1</td>\n",
+              "      <td>7.5</td>\n",
+              "      <td>941.5</td>\n",
+              "      <td>774.3</td>\n",
+              "      <td>28</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>439.0</td>\n",
+              "      <td>177.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>186.0</td>\n",
+              "      <td>11.1</td>\n",
+              "      <td>884.9</td>\n",
+              "      <td>707.9</td>\n",
+              "      <td>3</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>190.3</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>125.2</td>\n",
+              "      <td>161.9</td>\n",
+              "      <td>9.9</td>\n",
+              "      <td>1088.1</td>\n",
+              "      <td>802.6</td>\n",
+              "      <td>14</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>339.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>197.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>968.0</td>\n",
+              "      <td>781.0</td>\n",
+              "      <td>14</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>...</th>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>295</th>\n",
+              "      <td>337.9</td>\n",
+              "      <td>189.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>174.9</td>\n",
+              "      <td>9.5</td>\n",
+              "      <td>944.7</td>\n",
+              "      <td>755.8</td>\n",
+              "      <td>56</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>296</th>\n",
+              "      <td>318.8</td>\n",
+              "      <td>212.5</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>155.7</td>\n",
+              "      <td>14.3</td>\n",
+              "      <td>852.1</td>\n",
+              "      <td>880.4</td>\n",
+              "      <td>3</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>297</th>\n",
+              "      <td>255.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>192.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>889.8</td>\n",
+              "      <td>945.0</td>\n",
+              "      <td>7</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>298</th>\n",
+              "      <td>249.1</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>98.8</td>\n",
+              "      <td>158.1</td>\n",
+              "      <td>12.8</td>\n",
+              "      <td>987.8</td>\n",
+              "      <td>889.0</td>\n",
+              "      <td>3</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>299</th>\n",
+              "      <td>233.8</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>94.6</td>\n",
+              "      <td>197.9</td>\n",
+              "      <td>4.6</td>\n",
+              "      <td>947.0</td>\n",
+              "      <td>852.2</td>\n",
+              "      <td>14</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "<p>300 rows × 8 columns</p>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "       Cement  Blast_Furnace_Slag  Fly_Ash  Water  Superplasticizer  \\\n",
+              "Batch                                                                 \n",
+              "0       136.0               196.0     98.0  199.0               6.0   \n",
+              "1       143.8               136.3    106.2  178.1               7.5   \n",
+              "2       439.0               177.0      0.0  186.0              11.1   \n",
+              "3       190.3                 0.0    125.2  161.9               9.9   \n",
+              "4       339.0                 0.0      0.0  197.0               0.0   \n",
+              "...       ...                 ...      ...    ...               ...   \n",
+              "295     337.9               189.0      0.0  174.9               9.5   \n",
+              "296     318.8               212.5      0.0  155.7              14.3   \n",
+              "297     255.0                 0.0      0.0  192.0               0.0   \n",
+              "298     249.1                 0.0     98.8  158.1              12.8   \n",
+              "299     233.8                 0.0     94.6  197.9               4.6   \n",
+              "\n",
+              "       Coarse_Aggregate  Fine_Aggregate  Age  \n",
+              "Batch                                         \n",
+              "0                 847.0           783.0   28  \n",
+              "1                 941.5           774.3   28  \n",
+              "2                 884.9           707.9    3  \n",
+              "3                1088.1           802.6   14  \n",
+              "4                 968.0           781.0   14  \n",
+              "...                 ...             ...  ...  \n",
+              "295               944.7           755.8   56  \n",
+              "296               852.1           880.4    3  \n",
+              "297               889.8           945.0    7  \n",
+              "298               987.8           889.0    3  \n",
+              "299               947.0           852.2   14  \n",
+              "\n",
+              "[300 rows x 8 columns]"
+            ]
+          },
+          "execution_count": 6,
+          "metadata": {},
+          "output_type": "execute_result"
+        }
+      ],
+      "source": [
+        "df_test.columns = ['Cement','Blast_Furnace_Slag','Fly_Ash','Water','Superplasticizer',\n",
+        "              'Coarse_Aggregate','Fine_Aggregate','Age']\n",
+        "df_test"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "377c2db4",
+      "metadata": {
+        "id": "377c2db4"
+      },
+      "source": [
+        ">Call linearRegression function and fit the data into train and test variables then print intercept and coefficients in form of w..."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "9b4ea805",
+      "metadata": {
+        "id": "9b4ea805",
+        "outputId": "9c694283-5d8d-4a58-e2b5-395ff649f59b"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "w_0 = -21.257356684799035 \n",
+            "w_1 = 0.12137998687621716 \n",
+            "w_2 = 0.10703156220314446 \n",
+            "w_3 = 0.09031757773240537 \n",
+            "w_4 = -0.17228536137653988 \n",
+            "w_5 = 0.2139221261135758 \n",
+            "w_6 = 0.019803933706534174 \n",
+            "w_7 = 0.02003485210687323 \n",
+            "w_8 = 0.11651740629379011\n"
+          ]
+        }
+      ],
+      "source": [
+        "reg = linear_model.LinearRegression()\n",
+        "reg.fit(df_train[['Cement','Blast_Furnace_Slag','Fly_Ash','Water','Superplasticizer',\n",
+        "              'Coarse_Aggregate','Fine_Aggregate','Age']], df_train['Compressive_Strength'])\n",
+        "w = [reg.intercept_, reg.coef_[0], reg.coef_[1], reg.coef_[2], reg.coef_[3], reg.coef_[4], reg.coef_[5], reg.coef_[6], reg.coef_[7]]\n",
+        "print('w_0 =', w[0], '\\nw_1 =', w[1], '\\nw_2 =', w[2], '\\nw_3 =', w[3], '\\nw_4 =', w[4], '\\nw_5 =', w[5],'\\nw_6 =', w[6], '\\nw_7 =', w[7], '\\nw_8 =', w[8])\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "5b35413c",
+      "metadata": {
+        "id": "5b35413c"
+      },
+      "source": [
+        "**Statsmodels**"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "c5199eab",
+      "metadata": {
+        "scrolled": false,
+        "id": "c5199eab",
+        "outputId": "adc0de14-93a8-450b-d17f-88f143b5a0e0"
+      },
+      "outputs": [
+        {
+          "data": {
+            "text/html": [
+              "<table class=\"simpletable\">\n",
+              "<caption>OLS Regression Results</caption>\n",
+              "<tr>\n",
+              "  <th>Dep. Variable:</th>    <td>Compressive_Strength</td> <th>  R-squared:         </th> <td>   0.632</td> \n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Model:</th>                     <td>OLS</td>         <th>  Adj. R-squared:    </th> <td>   0.628</td> \n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Method:</th>               <td>Least Squares</td>    <th>  F-statistic:       </th> <td>   148.4</td> \n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Date:</th>               <td>Mon, 14 Nov 2022</td>   <th>  Prob (F-statistic):</th> <td>1.60e-144</td>\n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Time:</th>                   <td>12:44:20</td>       <th>  Log-Likelihood:    </th> <td> -2619.7</td> \n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>No. Observations:</th>        <td>   700</td>        <th>  AIC:               </th> <td>   5257.</td> \n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Df Residuals:</th>            <td>   691</td>        <th>  BIC:               </th> <td>   5298.</td> \n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Df Model:</th>                <td>     8</td>        <th>                     </th>     <td> </td>    \n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Covariance Type:</th>        <td>nonrobust</td>      <th>                     </th>     <td> </td>    \n",
+              "</tr>\n",
+              "</table>\n",
+              "<table class=\"simpletable\">\n",
+              "<tr>\n",
+              "           <td></td>             <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>  \n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Intercept</th>          <td>  -21.2574</td> <td>   33.588</td> <td>   -0.633</td> <td> 0.527</td> <td>  -87.205</td> <td>   44.690</td>\n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Cement</th>             <td>    0.1214</td> <td>    0.010</td> <td>   11.567</td> <td> 0.000</td> <td>    0.101</td> <td>    0.142</td>\n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Blast_Furnace_Slag</th> <td>    0.1070</td> <td>    0.012</td> <td>    8.575</td> <td> 0.000</td> <td>    0.083</td> <td>    0.132</td>\n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Fly_Ash</th>            <td>    0.0903</td> <td>    0.015</td> <td>    5.917</td> <td> 0.000</td> <td>    0.060</td> <td>    0.120</td>\n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Water</th>              <td>   -0.1723</td> <td>    0.051</td> <td>   -3.352</td> <td> 0.001</td> <td>   -0.273</td> <td>   -0.071</td>\n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Superplasticizer</th>   <td>    0.2139</td> <td>    0.113</td> <td>    1.891</td> <td> 0.059</td> <td>   -0.008</td> <td>    0.436</td>\n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Coarse_Aggregate</th>   <td>    0.0198</td> <td>    0.012</td> <td>    1.656</td> <td> 0.098</td> <td>   -0.004</td> <td>    0.043</td>\n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Fine_Aggregate</th>     <td>    0.0200</td> <td>    0.013</td> <td>    1.522</td> <td> 0.129</td> <td>   -0.006</td> <td>    0.046</td>\n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Age</th>                <td>    0.1165</td> <td>    0.007</td> <td>   17.820</td> <td> 0.000</td> <td>    0.104</td> <td>    0.129</td>\n",
+              "</tr>\n",
+              "</table>\n",
+              "<table class=\"simpletable\">\n",
+              "<tr>\n",
+              "  <th>Omnibus:</th>       <td> 2.533</td> <th>  Durbin-Watson:     </th> <td>   2.081</td>\n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Prob(Omnibus):</th> <td> 0.282</td> <th>  Jarque-Bera (JB):  </th> <td>   2.431</td>\n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Skew:</th>          <td>-0.143</td> <th>  Prob(JB):          </th> <td>   0.297</td>\n",
+              "</tr>\n",
+              "<tr>\n",
+              "  <th>Kurtosis:</th>      <td> 3.039</td> <th>  Cond. No.          </th> <td>1.12e+05</td>\n",
+              "</tr>\n",
+              "</table><br/><br/>Notes:<br/>[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.<br/>[2] The condition number is large, 1.12e+05. This might indicate that there are<br/>strong multicollinearity or other numerical problems."
+            ],
+            "text/plain": [
+              "<class 'statsmodels.iolib.summary.Summary'>\n",
+              "\"\"\"\n",
+              "                             OLS Regression Results                             \n",
+              "================================================================================\n",
+              "Dep. Variable:     Compressive_Strength   R-squared:                       0.632\n",
+              "Model:                              OLS   Adj. R-squared:                  0.628\n",
+              "Method:                   Least Squares   F-statistic:                     148.4\n",
+              "Date:                  Mon, 14 Nov 2022   Prob (F-statistic):          1.60e-144\n",
+              "Time:                          12:44:20   Log-Likelihood:                -2619.7\n",
+              "No. Observations:                   700   AIC:                             5257.\n",
+              "Df Residuals:                       691   BIC:                             5298.\n",
+              "Df Model:                             8                                         \n",
+              "Covariance Type:              nonrobust                                         \n",
+              "======================================================================================\n",
+              "                         coef    std err          t      P>|t|      [0.025      0.975]\n",
+              "--------------------------------------------------------------------------------------\n",
+              "Intercept            -21.2574     33.588     -0.633      0.527     -87.205      44.690\n",
+              "Cement                 0.1214      0.010     11.567      0.000       0.101       0.142\n",
+              "Blast_Furnace_Slag     0.1070      0.012      8.575      0.000       0.083       0.132\n",
+              "Fly_Ash                0.0903      0.015      5.917      0.000       0.060       0.120\n",
+              "Water                 -0.1723      0.051     -3.352      0.001      -0.273      -0.071\n",
+              "Superplasticizer       0.2139      0.113      1.891      0.059      -0.008       0.436\n",
+              "Coarse_Aggregate       0.0198      0.012      1.656      0.098      -0.004       0.043\n",
+              "Fine_Aggregate         0.0200      0.013      1.522      0.129      -0.006       0.046\n",
+              "Age                    0.1165      0.007     17.820      0.000       0.104       0.129\n",
+              "==============================================================================\n",
+              "Omnibus:                        2.533   Durbin-Watson:                   2.081\n",
+              "Prob(Omnibus):                  0.282   Jarque-Bera (JB):                2.431\n",
+              "Skew:                          -0.143   Prob(JB):                        0.297\n",
+              "Kurtosis:                       3.039   Cond. No.                     1.12e+05\n",
+              "==============================================================================\n",
+              "\n",
+              "Notes:\n",
+              "[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.\n",
+              "[2] The condition number is large, 1.12e+05. This might indicate that there are\n",
+              "strong multicollinearity or other numerical problems.\n",
+              "\"\"\""
+            ]
+          },
+          "execution_count": 8,
+          "metadata": {},
+          "output_type": "execute_result"
+        }
+      ],
+      "source": [
+        "import statsmodels.formula.api as smf\n",
+        "sm = smf.ols(formula='Compressive_Strength ~ Cement + Blast_Furnace_Slag + Fly_Ash + Water + Superplasticizer + Coarse_Aggregate + Fine_Aggregate + Age',data = df_train).fit()\n",
+        "sm.summary()"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "8c966ca6",
+      "metadata": {
+        "id": "8c966ca6"
+      },
+      "source": [
+        ">According to **t** value we can denote that \n",
+        "\n",
+        ">Which ingredient affects the strength most? - **Cement**<br>\n",
+        "\n",
+        ">Which ingredient affects the strength least? - **Fine Aggregate**"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "3a59f4bd",
+      "metadata": {
+        "id": "3a59f4bd"
+      },
+      "source": [
+        "After we predict the intercept and individual coefficients, we can further predict **Compressive_Strength** using our `df_test` dataset and then print the result in an array form."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "44e35d15",
+      "metadata": {
+        "scrolled": true,
+        "id": "44e35d15",
+        "outputId": "998bffcd-81b5-4c95-bed5-09237687d8d5"
+      },
+      "outputs": [
+        {
+          "data": {
+            "text/plain": [
+              "array([[27.80208461],\n",
+              "       [28.71848414],\n",
+              "       [53.35922741],\n",
+              "       [26.63372085],\n",
+              "       [22.39891369],\n",
+              "       [30.550675  ],\n",
+              "       [37.48651565],\n",
+              "       [40.98809642],\n",
+              "       [16.60183889],\n",
+              "       [26.99120512],\n",
+              "       [36.1816663 ],\n",
+              "       [18.42958993],\n",
+              "       [35.6532498 ],\n",
+              "       [61.50983375],\n",
+              "       [30.46336596],\n",
+              "       [60.72258558],\n",
+              "       [25.22695894],\n",
+              "       [43.58887455],\n",
+              "       [64.84311719],\n",
+              "       [11.21556427]])"
+            ]
+          },
+          "execution_count": 9,
+          "metadata": {},
+          "output_type": "execute_result"
+        }
+      ],
+      "source": [
+        "y_bar =  reg.predict(df_test).reshape(-1,1)\n",
+        "y_bar[:20]\n",
+        "#df_x=pd.DataFrame({'cities':y_bar}, index=[0])\n",
+        "#print(df_x)\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "7c409f72",
+      "metadata": {
+        "id": "7c409f72"
+      },
+      "source": [
+        ">**r2_score**:- <br><br>\n",
+        "$r2 = 1 – (SSres  /SSmean )$<br>\n",
+        " $r2 = 1 - (original values(y) - predicted values(y^))^2$"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "5ebff6b5",
+      "metadata": {
+        "id": "5ebff6b5"
+      },
+      "outputs": [],
+      "source": [
+        "from sklearn.metrics import r2_score\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "2606abbb",
+      "metadata": {
+        "id": "2606abbb",
+        "outputId": "e26d3421-71d5-4458-931c-4b85e9202215"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "Accuracy is 56.22 %\n"
+          ]
+        }
+      ],
+      "source": [
+        "accuracy = reg.score(df_test, df_true['Compressive Strength'])*100\n",
+        "print('Accuracy is',round(accuracy,2),'%')\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "0e887511",
+      "metadata": {
+        "id": "0e887511"
+      },
+      "source": [
+        "Hence after we concatenate both the arrays and print them as one."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "3a6ce52b",
+      "metadata": {
+        "id": "3a6ce52b",
+        "outputId": "7232cb2b-5475-46d8-c1f0-43e37d213ba5"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "[[26.97       27.80208461]\n",
+            " [26.15       28.71848414]\n",
+            " [39.3        53.35922741]\n",
+            " [22.72       26.63372085]\n",
+            " [27.04       22.39891369]\n",
+            " [26.05       30.550675  ]\n",
+            " [45.84       37.48651565]\n",
+            " [55.51       40.98809642]\n",
+            " [28.63       16.60183889]\n",
+            " [33.27       26.99120512]\n",
+            " [53.77       36.1816663 ]\n",
+            " [19.69       18.42958993]\n",
+            " [40.15       35.6532498 ]\n",
+            " [79.3        61.50983375]\n",
+            " [31.72       30.46336596]\n",
+            " [36.15       60.72258558]\n",
+            " [42.33       25.22695894]\n",
+            " [52.82       43.58887455]\n",
+            " [66.7        64.84311719]\n",
+            " [ 6.47       11.21556427]]\n"
+          ]
+        }
+      ],
+      "source": [
+        "con = np.concatenate((arr, y_bar), axis=1)\n",
+        "print(con[:20])"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "9dbd97d1",
+      "metadata": {
+        "id": "9dbd97d1"
+      },
+      "source": [
+        "> Create a new dataframe `pred_df` to store both the Actual and Predicted value from our linear regression model."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "bfd04420",
+      "metadata": {
+        "id": "bfd04420",
+        "outputId": "664a6151-a74b-4e9b-de79-aaab1ee8a058"
+      },
+      "outputs": [
+        {
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Actual Value</th>\n",
+              "      <th>Predicted Value</th>\n",
+              "      <th>Difference</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>26.97</td>\n",
+              "      <td>27.802085</td>\n",
+              "      <td>-0.832085</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>26.15</td>\n",
+              "      <td>28.718484</td>\n",
+              "      <td>-2.568484</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>39.30</td>\n",
+              "      <td>53.359227</td>\n",
+              "      <td>-14.059227</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>22.72</td>\n",
+              "      <td>26.633721</td>\n",
+              "      <td>-3.913721</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>27.04</td>\n",
+              "      <td>22.398914</td>\n",
+              "      <td>4.641086</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "   Actual Value  Predicted Value  Difference\n",
+              "0         26.97        27.802085   -0.832085\n",
+              "1         26.15        28.718484   -2.568484\n",
+              "2         39.30        53.359227  -14.059227\n",
+              "3         22.72        26.633721   -3.913721\n",
+              "4         27.04        22.398914    4.641086"
+            ]
+          },
+          "execution_count": 14,
+          "metadata": {},
+          "output_type": "execute_result"
+        }
+      ],
+      "source": [
+        "pred_df=pd.DataFrame({'Actual Value':con[:,0],'Predicted Value':con[:,1],'Difference':con[:,0]-con[:,1]})\n",
+        "pred_df.head()"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "a12b54e6",
+      "metadata": {
+        "id": "a12b54e6",
+        "outputId": "743cf1da-9bbb-4440-a2cc-25830d849cad"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "Accuracy is 30.91 %\n"
+          ]
+        }
+      ],
+      "source": [
+        "accuracy = r2_score(pred_df['Predicted Value'], pred_df['Actual Value'])*100\n",
+        "print('Accuracy is',round(accuracy,2),'%')"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "3837ba92",
+      "metadata": {
+        "id": "3837ba92"
+      },
+      "source": [
+        ">Plot a scatter a graph to show the correlation between the actual and predicted value and as you can it shows linear correlation."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "ef71cba9",
+      "metadata": {
+        "scrolled": false,
+        "id": "ef71cba9"
+      },
+      "outputs": [],
+      "source": [
+        "plt.figure(figsize = (12,10))\n",
+        "sns.regplot(x= \"Predicted Value\", y= \"Actual Value\", data = pred_df, fit_reg=True, scatter_kws = {'color': 'skyblue'}, line_kws = {'color': '#CCCC00'},marker='*');\n",
+        "plt.title('Predicted Value(y^) vs Actual Value(y)', fontsize = 20)\n",
+        "\n",
+        "plt.show()\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "44465f87",
+      "metadata": {
+        "id": "44465f87"
+      },
+      "outputs": [],
+      "source": []
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "90d673fa",
+      "metadata": {
+        "id": "90d673fa"
+      },
+      "outputs": [],
+      "source": []
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "display_name": "Python 3 (ipykernel)",
+      "language": "python",
+      "name": "python3"
+    },
+    "language_info": {
+      "codemirror_mode": {
+        "name": "ipython",
+        "version": 3
+      },
+      "file_extension": ".py",
+      "mimetype": "text/x-python",
+      "name": "python",
+      "nbconvert_exporter": "python",
+      "pygments_lexer": "ipython3",
+      "version": "3.9.7"
+    },
+    "colab": {
+      "provenance": [],
+      "include_colab_link": true
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
